@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Espectacular</title>
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#info {
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  left: 20px;
+  background: rgba(0,0,0,0.5);
+  padding: 10px 15px;
+  border-radius: 4px;
+}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="info">
+  <h1>Bienvenidos</h1>
+  <p>Mueve el cursor para crear un show de partículas.</p>
+</div>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+
+function resize() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const particles = [];
+class Particle {
+  constructor(x,y) {
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random()-0.5)*4;
+    this.vy = (Math.random()-0.5)*4;
+    this.life = 100 + Math.random()*50;
+    this.size = 2 + Math.random()*3;
+    this.hue = Math.random()*360;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += 0.05; // gravity effect
+    this.life--;
+  }
+  draw(ctx) {
+    ctx.fillStyle = `hsl(${this.hue},100%,50%)`;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function addParticles(x,y) {
+  for(let i=0; i<20; i++) {
+    particles.push(new Particle(x,y));
+  }
+}
+
+canvas.addEventListener('mousemove', e => {
+  addParticles(e.clientX, e.clientY);
+});
+canvas.addEventListener('click', e => {
+  for(let i=0; i<10; i++) addParticles(e.clientX,e.clientY);
+});
+
+function animate() {
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(0,0,width,height);
+  for(let i=particles.length-1; i>=0; i--) {
+    const p = particles[i];
+    p.update();
+    p.draw(ctx);
+    if(p.life<=0) particles.splice(i,1);
+  }
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
